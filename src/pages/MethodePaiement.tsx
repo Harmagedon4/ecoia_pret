@@ -35,8 +35,8 @@ const MethodePaiement: React.FC = () => {
 
   const paymentMethods = [
     { id: 'momo', name: 'Mobile Money (MTN)', icon: Smartphone, color: 'bg-yellow-500' },
-    { id: 'orange', name: 'Orange Money', icon: Smartphone, color: 'bg-orange-500' },
-    { id: 'wave', name: 'Wave', icon: Smartphone, color: 'bg-blue-500' }
+    { id: 'moov', name: 'Orange Money', icon: Smartphone, color: 'bg-orange-500' },
+    { id: 'celtis', name: 'Wave', icon: Smartphone, color: 'bg-blue-500' }
   ];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
