@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/App";
 import { toast } from "@/hooks/use-toast";
-import ecoiaLogo from '@/assets/ecoia-logo.png';
+import ecoiaLogo from '/logo_ecoia.png';
 
 const Inscription: React.FC = () => {
   const [formData, setFormData] = useState({
