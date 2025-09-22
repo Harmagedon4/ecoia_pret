@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/App";
 import { toast } from "@/hooks/use-toast";
 import ecoiaLogo from '/logo_ecoia.png';
+import api from '@/api';
 
 const Inscription: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -29,43 +30,61 @@ const Inscription: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-        variant: "destructive"
-      });
-      return;
-    }
+  e.preventDefault();
+  
+  if (formData.password !== formData.confirmPassword) {
+    toast({
+      title: "Erreur",
+      description: "Les mots de passe ne correspondent pas",
+      variant: "destructive"
+    });
+    return;
+  }
 
-    if (!acceptTerms) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez accepter les conditions d'utilisation",
-        variant: "destructive"
-      });
-      return;
-    }
+  if (!acceptTerms) {
+    toast({
+      title: "Erreur",
+      description: "Veuillez accepter les conditions d'utilisation",
+      variant: "destructive"
+    });
+    return;
+  }
 
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      login({
-        email: formData.email,
-        name: formData.name,
-        id: '1'
-      });
-      toast({
-        title: "Inscription réussie",
-        description: "Bienvenue sur ECOIA !"
-      });
-      navigate('/accueil');
-      setLoading(false);
-    }, 1000);
-  };
+  setLoading(true);
+
+  try {
+    // Appel à ton backend
+    const res = await api.post('/auth/register', {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password
+    });
+
+    // Après inscription, tu peux automatiquement connecter l'utilisateur
+    const loginRes = await api.post('/auth/login', {
+      email: formData.email,
+      password: formData.password
+    });
+
+    login({ ...loginRes.data.user, token: loginRes.data.token });
+
+    toast({
+      title: "Inscription réussie",
+      description: "Bienvenue sur ECOIA !"
+    });
+
+    navigate('/accueil');
+  } catch (err: any) {
+    toast({
+      title: "Erreur",
+      description: err.response?.data?.message || err.message,
+      variant: "destructive"
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5 p-4">

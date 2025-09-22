@@ -307,20 +307,63 @@ const FaireDemande = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const submitApplication = () => {
-    if (!validateStep(currentStep)) {
+  const submitApplication = async () => {
+  if (!validateStep(currentStep)) {
+    toast({
+      title: "Informations manquantes",
+      description: "Veuillez cocher toutes les cases et téléverser les quatre documents requis",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  try {
+    const form = new FormData();
+
+    // 📝 Ajouter tous les champs de formData
+    Object.entries(formData).forEach(([key, value]) => {
+      form.append(key, String(value));
+    });
+
+    // 👤 Id utilisateur (si tu as auth avec JWT, sinon à remplacer par ton système)
+    form.append("userId", "1");
+
+    // 📂 Ajouter les fichiers
+    tempDocument.forEach((doc) => {
+      form.append("documents", doc.file);
+    });
+
+    const res = await fetch("https://ecoia-pret-backend.vercel.app/api/requests/create", {
+      method: "POST",
+      body: form,
+      // ⚠️ NE PAS mettre Content-Type ici !
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
       toast({
-        title: "Informations manquantes",
-        description: "Veuillez cocher toutes les cases et téléverser les quatre documents requis",
+        title: "Demande soumise",
+        description: "Votre demande de prêt a été envoyée avec succès ✅",
+      });
+      console.log("📌 Nouvelle demande créée :", data);
+    } else {
+      toast({
+        title: "Erreur",
+        description: data.error || "Impossible de soumettre la demande",
         variant: "destructive"
       });
-      return;
     }
+  } catch (err) {
+    console.error("❌ Erreur frontend :", err);
     toast({
-      title: "Demande soumise",
-      description: "Votre demande de prêt a été envoyée avec succès",
+      title: "Erreur réseau",
+      description: "Vérifiez votre connexion ou réessayez",
+      variant: "destructive"
     });
-  };
+  }
+};
+
 
   const progress = (currentStep / 5) * 100;
 

@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/App";
 import { toast } from "@/hooks/use-toast";
 import ecoiaLogo from '/logo_ecoia.png';
+import api from '@/api'; // <-- import API
 
 const Connexion: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,35 +17,32 @@ const Connexion: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      login({
-        email,
-        name: 'John Doe',
-        id: '1'
-      });
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue sur ECOIA !"
-      });
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      // Login avec le token et les infos utilisateur
+      login({ ...res.data.user, token: res.data.token });
+      toast({ title: "Connexion réussie", description: "Bienvenue sur ECOIA !" });
       navigate('/accueil');
+    } catch (err: any) {
+      toast({ 
+        title: "Erreur", 
+        description: err.response?.data?.message || err.message, 
+        variant: "destructive" 
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleGoogleLogin = () => {
-    toast({
-      title: "Connexion Google",
-      description: "Fonctionnalité bientôt disponible"
-    });
+    toast({ title: "Connexion Google", description: "Fonctionnalité bientôt disponible" });
   };
 
   return (
@@ -74,7 +72,7 @@ const Connexion: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
               <div className="relative">

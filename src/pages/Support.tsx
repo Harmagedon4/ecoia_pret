@@ -21,7 +21,7 @@ const Support: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const submitTicket = () => {
+  const submitTicket = async () => {
     if (!formData.subject || !formData.message || !formData.email) {
       toast({
         title: "Informations manquantes",
@@ -31,20 +31,46 @@ const Support: React.FC = () => {
       return;
     }
 
-    toast({
-      title: "Demande envoyée",
-      description: "Votre demande de support a été envoyée. Nous vous répondrons sous 24h."
-    });
-    
-    // Reset form
-    setFormData({
-      subject: '',
-      category: '',
-      message: '',
-      email: '',
-      priority: 'normal'
-    });
+    try {
+      const res = await fetch("https://ecoia-pret-backend.vercel.app/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast({
+          title: "Demande envoyée ✅",
+          description: "Nous vous avons envoyé un accusé de réception par email."
+        });
+
+        // Reset form
+        setFormData({
+          subject: '',
+          category: '',
+          message: '',
+          email: '',
+          priority: 'normal'
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: data.message || "Impossible d'envoyer la demande",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Erreur serveur",
+        description: "Veuillez réessayer plus tard",
+        variant: "destructive"
+      });
+    }
   };
+
 
   return (
     <div className="space-y-6">
@@ -130,7 +156,7 @@ const Support: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-primary" />
                 <div>
-                  <p className="font-medium">+229 01 9740 4045</p>
+                  <p className="font-medium">+229 0198017676</p>
                   <p className="text-sm text-muted-foreground">Lun-Ven 9h-17h</p>
                 </div>
               </div>
